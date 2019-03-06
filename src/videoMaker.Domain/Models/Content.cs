@@ -6,7 +6,6 @@ namespace videoMaker.Domain.Models
 {
     public abstract class Content
     {
-
         public string SearchTerm { get; set; }
         public string Prefix { get; set; }
         public string SourceContentOriginal { get; set; }
