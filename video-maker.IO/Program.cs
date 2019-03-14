@@ -1,25 +1,43 @@
 ﻿using System;
+using videoMaker.Domain.Models;
+using videoMaker.Domain.Robots;
 
 namespace video_maker.IO
 {
     class Program
     {
+        private static Content content = new Content();
+        private static ConsoleKeyInfo keyPressed;
+        private static readonly string[] options = { " Who is", "What is", "The history of" };
+        private static int indexOption = 0;
+
+
         static void Main(string[] args)
         {
             ReadInputs();
 
+            Console.ReadKey(true);
         }
 
         private static void ReadInputs()
         {
-            Console.WriteLine("Type a Wikipedia search term:");
-            var inputWord = Console.ReadLine();
+            content = new Content
+            {
+                SearchTerm = AskAndReturnSearchTearm(),
+                Prefix = AskAndReturnPrefix()
+            };
 
+
+            Console.Clear();
+
+            var text = new Text(content);
+            text.Robot();
+
+        }
+
+        private static string AskAndReturnPrefix()
+        {
             Console.WriteLine("Choose the preffix");
-
-            ConsoleKeyInfo keyPressed;
-
-            string[] options = { " Who is", "What is", "The history of" };
 
             do
             {
@@ -32,21 +50,32 @@ namespace video_maker.IO
 
                 keyPressed = Console.ReadKey();
 
-            } while (keyPressed.Key != ConsoleKey.D1 && keyPressed.Key != ConsoleKey.D2 && keyPressed.Key != ConsoleKey.D3 && keyPressed.Key != ConsoleKey.D4);
+            } while
+            (NotPressedAvailableOption());
 
             if (keyPressed.Key == ConsoleKey.D4)
             {
                 Console.Clear();
                 ReadInputs();
             }
-            else
-            {
-                Console.Clear();
-                int.TryParse(keyPressed.KeyChar.ToString(), out var indexOption);
-                Console.WriteLine($"You Choosed: { options[indexOption - 1] + " " + inputWord}");
-            }
 
-            Console.ReadKey(true);
+            int.TryParse(keyPressed.KeyChar.ToString(), out indexOption);
+            return options[indexOption - 1];
+        }
+
+        private static bool NotPressedAvailableOption()
+        {
+            return keyPressed.Key != ConsoleKey.D1 &&
+                        keyPressed.Key != ConsoleKey.D2 &&
+                        keyPressed.Key != ConsoleKey.D3 &&
+                        keyPressed.Key != ConsoleKey.D4;
+        }
+
+        private static string AskAndReturnSearchTearm()
+        {
+            Console.WriteLine("Type a Wikipedia search term:");
+            var inputWord = Console.ReadLine();
+            return inputWord;
         }
     }
 }

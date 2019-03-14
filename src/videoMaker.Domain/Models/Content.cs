@@ -4,7 +4,7 @@ using System.Text;
 
 namespace videoMaker.Domain.Models
 {
-    public abstract class Content
+    public class Content
     {
         public string SearchTerm { get; set; }
         public string Prefix { get; set; }
@@ -18,6 +18,12 @@ namespace videoMaker.Domain.Models
             public string[] Keywords { get; set; }
             public string[] Images { get; set; }
 
+        }
+
+
+        public override string ToString()
+        {
+            return $"{Prefix} {SearchTerm}";
         }
     }
 }

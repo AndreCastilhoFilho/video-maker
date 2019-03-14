@@ -6,4 +6,8 @@
     <RootNamespace>video_maker.IO</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\src\videoMaker.Domain\videoMaker.Domain.csproj" />
+  </ItemGroup>
+
 </Project>
