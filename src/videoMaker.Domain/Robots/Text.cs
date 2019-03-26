@@ -1,7 +1,9 @@
 ﻿using Algorithmia;
 using System;
+using System.Linq;
 using System.Text.RegularExpressions;
 using videoMaker.Domain.Models;
+using static videoMaker.Domain.Models.Content;
 
 namespace videoMaker.Domain.Robots
 {
@@ -20,7 +22,7 @@ namespace videoMaker.Domain.Robots
 
             FetchContentFromWikipedia();
             SanitizeContent();
-            //BrakContentIntoSentences();
+            BreakContentIntoSentences();
 
             Console.WriteLine($"Recebi com sucesso o content:{ Content.ToString() }");
 
@@ -68,9 +70,13 @@ namespace videoMaker.Domain.Robots
                 .Replace("\\n", "\r\n");
         }
 
-        private void BrakContentIntoSentences()
+        private void BreakContentIntoSentences()
         {
-            throw new NotImplementedException();
+            var sentences = PragmaticSegmenterNet.Segmenter.Segment(Content.SourceContentSanitized).ToList<string>()
+                .Select(x => new Sentence() { Text = x })
+                .ToList();
+
+            Content.Sentences = sentences;
         }
     }
 }

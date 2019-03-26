@@ -33,6 +33,8 @@ namespace video_maker.IO
             var text = new Text(content);
             text.Robot();
 
+            Console.WriteLine(text.Content);
+
         }
 
         private static string AskAndReturnPrefix()
