@@ -9,47 +9,49 @@ namespace videoMaker.Domain.Robots
 {
     public class Text
     {
-        public Content Content { get; set; }
+        public Content _content { get; set; }
+        private RobotSettings _settings { get; set; }
 
-        public Text(Content content)
+        public Text(Content content, RobotSettings settings)
         {
-            Content = content;
+            _content = content;
+            _settings = settings;
         }
-
-
         public void Robot()
         {
-
             FetchContentFromWikipedia();
             SanitizeContent();
             BreakContentIntoSentences();
 
-            Console.WriteLine($"Recebi com sucesso o content:{ Content.ToString() }");
+            Console.WriteLine($"Recebi com sucesso o content:{ _content }");
+
+            Console.WriteLine(_content);
 
         }
 
         private void FetchContentFromWikipedia()
         {
-            var client = new Client(RobotSettings.ApiKey);
-            var algorithm = client.algo(RobotSettings.WikipidiaAlgorithm);
+            var client = new Client(_settings.ApiKey);
+            var algorithm = client.algo(_settings.WikipidiaAlgorithm);
 
-            var wikipidiaResponse = algorithm.pipe<object>(Content.SearchTerm);
+            var wikipidiaResponse = algorithm.pipe<object>(_content.SearchTerm);
             var wikipidiaContent = wikipidiaResponse.result.ToString();
 
 
-            Content.SourceContentOriginal = wikipidiaContent;
+            _content.SourceContentOriginal = wikipidiaContent;
+
 
         }
 
         private void SanitizeContent()
         {
-            var withoutBlankLines = RemoveBlankLines(Content.SourceContentOriginal);
+            var withoutBlankLines = RemoveBlankLines(_content.SourceContentOriginal);
             var withoutMarkDown = RemoveMarkdown(withoutBlankLines);
             var withoutDateInParenteses = RemoveDateInParentheses(withoutMarkDown);
 
-            Content.SourceContentSanitized = withoutDateInParenteses;
+            _content.SourceContentSanitized = withoutDateInParenteses;
 
-            Console.WriteLine(withoutDateInParenteses);
+
 
         }
 
@@ -61,7 +63,7 @@ namespace videoMaker.Domain.Robots
 
         private string RemoveMarkdown(string text)
         {
-            return Regex.Replace(text, @"^=*", string.Empty, RegexOptions.Multiline).Replace("===", "").Replace("==", "");
+            return Regex.Replace(text, @"^=*", string.Empty, RegexOptions.Multiline).Replace("===", "").Replace("==", "").Replace("{", "").Replace("}", "");
         }
 
         private string RemoveBlankLines(string text)
@@ -72,11 +74,11 @@ namespace videoMaker.Domain.Robots
 
         private void BreakContentIntoSentences()
         {
-            var sentences = PragmaticSegmenterNet.Segmenter.Segment(Content.SourceContentSanitized).ToList<string>()
+            var sentences = PragmaticSegmenterNet.Segmenter.Segment(_content.SourceContentSanitized).ToList<string>()
                 .Select(x => new Sentence() { Text = x })
                 .ToList();
 
-            Content.Sentences = sentences;
+            _content.Sentences = sentences;
         }
     }
 }

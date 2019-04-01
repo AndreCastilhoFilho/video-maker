@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Microsoft.Extensions.Configuration;
+using System;
+using System.IO;
 using videoMaker.Domain.Models;
 using videoMaker.Domain.Robots;
 
@@ -10,10 +12,16 @@ namespace video_maker.IO
         private static ConsoleKeyInfo keyPressed;
         private static readonly string[] options = { " Who is", "What is", "The history of" };
         private static int indexOption = 0;
-
+        public static IConfigurationRoot Configuration { get; set; }
 
         static void Main(string[] args)
         {
+            var builder = new ConfigurationBuilder()
+               .SetBasePath(Directory.GetCurrentDirectory())
+               .AddJsonFile("appsettings.json");
+
+            Configuration = builder.Build();
+
             ReadInputs();
 
             Console.ReadKey(true);
@@ -27,13 +35,16 @@ namespace video_maker.IO
                 Prefix = AskAndReturnPrefix()
             };
 
+            var apiKey = Configuration["AlgorithmiaConfig:apikey"];
+            var wikipidiaAlgorithm = Configuration["AlgorithmiaConfig:wikipidia_algorithm"];
+
 
             Console.Clear();
 
-            var text = new Text(content);
+            var text = new Text(content, new RobotSettings(apiKey, wikipidiaAlgorithm));
             text.Robot();
 
-            Console.WriteLine(text.Content);
+            Console.WriteLine(text._content);
 
         }
 
