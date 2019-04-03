@@ -82,10 +82,10 @@ namespace videoMaker.Domain.Robots
         private void BreakContentIntoSentences()
         {
             var sentences = PragmaticSegmenterNet.Segmenter.Segment(_content.SourceContentSanitized).ToList<string>()
-                .Select(x => new Sentence() { Text = x }).Take(100)
+                .Select(x => new Sentence() { Text = x })
                 .ToList();
 
-            _content.Sentences = sentences;
+            _content.Sentences = sentences.Take(_settings.MaximunSentences).ToList();
         }
     }
 }
