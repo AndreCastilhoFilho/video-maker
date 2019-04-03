@@ -12,13 +12,13 @@ namespace videoMaker.Domain.Robots
         public Content _content { get; set; }
         private RobotSettings _settings { get; set; }
 
-        private NaturalLanguageUnderstandingRobot _keywordRobot;
+        private NaturalLanguageUnderstanding _nluService;
 
-        public Text(Content content, RobotSettings settings)
+        public Text(RobotSettings settings)
         {
-            _content = content;
+            _content = State.Load();
             _settings = settings;
-            _keywordRobot = new NaturalLanguageUnderstandingRobot
+            _nluService = new NaturalLanguageUnderstanding
                 (settings.NluApiKey, settings.NluUrl, settings.NluVersionDate);
         }
         public void Robot()
@@ -28,17 +28,16 @@ namespace videoMaker.Domain.Robots
             BreakContentIntoSentences();
             FetchKeywordsOfAllSentences();
 
+            State.Save(_content);
+
             Console.WriteLine($"Recebi com sucesso o content:{ _content }");
-
-            Console.WriteLine(_content);
-
         }
 
         private void FetchKeywordsOfAllSentences()
         {
             foreach (var s in _content.Sentences)
             {
-                s.Keywords = _keywordRobot.ReturnKeywords(s.Text);
+                s.Keywords = _nluService.ReturnKeywords(s.Text);
             }
         }
 
@@ -83,7 +82,7 @@ namespace videoMaker.Domain.Robots
         private void BreakContentIntoSentences()
         {
             var sentences = PragmaticSegmenterNet.Segmenter.Segment(_content.SourceContentSanitized).ToList<string>()
-                .Select(x => new Sentence() { Text = x })
+                .Select(x => new Sentence() { Text = x }).Take(100)
                 .ToList();
 
             _content.Sentences = sentences;

@@ -2,17 +2,15 @@
 using IBM.WatsonDeveloperCloud.NaturalLanguageUnderstanding.v1.Model;
 using IBM.WatsonDeveloperCloud.Util;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace videoMaker.Domain.Robots
 {
-    public class NaturalLanguageUnderstandingRobot
+    public class NaturalLanguageUnderstanding
     {
         private INaturalLanguageUnderstandingService _naturalLanguageUnderstandingService;
 
-        public NaturalLanguageUnderstandingRobot(string apiKey, string url, string versionDate)
+        public NaturalLanguageUnderstanding(string apiKey, string url, string versionDate)
         {
             TokenOptions options = new TokenOptions()
             {
@@ -20,16 +18,9 @@ namespace videoMaker.Domain.Robots
                 ServiceUrl = url
             };
 
-            try
-            {
-                _naturalLanguageUnderstandingService = new NaturalLanguageUnderstandingService(options, versionDate);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-
+            _naturalLanguageUnderstandingService = new NaturalLanguageUnderstandingService(options, versionDate);
         }
+
         public string[] ReturnKeywords(string content)
         {
             try
@@ -53,7 +44,7 @@ namespace videoMaker.Domain.Robots
                 {
                     Keywords = new KeywordsOptions()
                     {
-                        Limit = 8,
+                        Limit = 7,
                         Sentiment = true,
                         Emotion = true
                     }
