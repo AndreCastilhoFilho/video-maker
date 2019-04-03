@@ -12,21 +12,34 @@ namespace videoMaker.Domain.Robots
         public Content _content { get; set; }
         private RobotSettings _settings { get; set; }
 
+        private NaturalLanguageUnderstandingRobot _keywordRobot;
+
         public Text(Content content, RobotSettings settings)
         {
             _content = content;
             _settings = settings;
+            _keywordRobot = new NaturalLanguageUnderstandingRobot
+                (settings.NluApiKey, settings.NluUrl, settings.NluVersionDate);
         }
         public void Robot()
         {
             FetchContentFromWikipedia();
             SanitizeContent();
             BreakContentIntoSentences();
+            FetchKeywordsOfAllSentences();
 
             Console.WriteLine($"Recebi com sucesso o content:{ _content }");
 
             Console.WriteLine(_content);
 
+        }
+
+        private void FetchKeywordsOfAllSentences()
+        {
+            foreach (var s in _content.Sentences)
+            {
+                s.Keywords = _keywordRobot.ReturnKeywords(s.Text);
+            }
         }
 
         private void FetchContentFromWikipedia()
@@ -39,8 +52,6 @@ namespace videoMaker.Domain.Robots
 
 
             _content.SourceContentOriginal = wikipidiaContent;
-
-
         }
 
         private void SanitizeContent()
@@ -50,9 +61,6 @@ namespace videoMaker.Domain.Robots
             var withoutDateInParenteses = RemoveDateInParentheses(withoutMarkDown);
 
             _content.SourceContentSanitized = withoutDateInParenteses;
-
-
-
         }
 
         private string RemoveDateInParentheses(string text)

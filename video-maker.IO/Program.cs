@@ -38,10 +38,16 @@ namespace video_maker.IO
             var apiKey = Configuration["AlgorithmiaConfig:apikey"];
             var wikipidiaAlgorithm = Configuration["AlgorithmiaConfig:wikipidia_algorithm"];
 
+            var watsonApiKey = Configuration["WatsonConfig:apikey"];
+            var watsonUrl = Configuration["WatsonConfig:url"];
+
 
             Console.Clear();
 
-            var text = new Text(content, new RobotSettings(apiKey, wikipidiaAlgorithm));
+            var settings = new RobotSettings(apiKey, wikipidiaAlgorithm, watsonApiKey, watsonUrl);
+
+            var text = new Text(content, settings);
+
             text.Robot();
 
             Console.WriteLine(text._content);
@@ -63,8 +69,7 @@ namespace video_maker.IO
 
                 keyPressed = Console.ReadKey();
 
-            } while
-            (NotPressedAvailableOption());
+            } while (NotPressedAvailableOption());
 
             if (keyPressed.Key == ConsoleKey.D4)
             {

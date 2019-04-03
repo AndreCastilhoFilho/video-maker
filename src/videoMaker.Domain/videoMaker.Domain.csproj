@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="Algorithmia.Client" Version="1.0.5" />
+    <PackageReference Include="IBM.WatsonDeveloperCloud.NaturalLanguageUnderstanding.v1" Version="2.16.0" />
     <PackageReference Include="PragmaticSegmenterNet" Version="1.0.1" />
   </ItemGroup>
 
