@@ -28,9 +28,7 @@ namespace videoMaker.Domain.Robots
             BreakContentIntoSentences();
             FetchKeywordsOfAllSentences();
 
-            State.Save(_content);
-
-            Console.WriteLine($"Recebi com sucesso o content:{ _content }");
+            State.Save(_content);         
         }
 
         private void FetchKeywordsOfAllSentences()
@@ -70,13 +68,18 @@ namespace videoMaker.Domain.Robots
 
         private string RemoveMarkdown(string text)
         {
-            return Regex.Replace(text, @"^=*", string.Empty, RegexOptions.Multiline).Replace("===", "").Replace("==", "").Replace("{", "").Replace("}", "");
+            return Regex.Replace(text, @"^=*", string.Empty, RegexOptions.Multiline)
+                .Replace("===", "")
+                .Replace("==", "")
+                .Replace("{", "")
+                .Replace("}", "")
+                .Replace(@"\", "");
         }
 
         private string RemoveBlankLines(string text)
         {
-            return Regex.Replace(text, @"^\s+$[\r\n]*", string.Empty, RegexOptions.Multiline)
-                .Replace("\\n", "\r\n");
+            var textSanitized = Regex.Replace(text, @"^\s+$[\r|\n]*", string.Empty, RegexOptions.Multiline);
+            return Regex.Replace(textSanitized, "\n|\r", String.Empty);
         }
 
         private void BreakContentIntoSentences()

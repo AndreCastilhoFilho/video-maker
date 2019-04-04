@@ -6,6 +6,8 @@
 
   <ItemGroup>
     <PackageReference Include="Algorithmia.Client" Version="1.0.5" />
+    <PackageReference Include="Google.Apis" Version="1.38.2" />
+    <PackageReference Include="Google.Apis.Customsearch.v1" Version="1.38.0.1369" />
     <PackageReference Include="IBM.WatsonDeveloperCloud.NaturalLanguageUnderstanding.v1" Version="2.16.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.2.0" />
     <PackageReference Include="PragmaticSegmenterNet" Version="1.0.1" />

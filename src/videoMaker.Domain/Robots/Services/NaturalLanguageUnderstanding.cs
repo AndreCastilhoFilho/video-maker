@@ -44,7 +44,7 @@ namespace videoMaker.Domain.Robots
                 {
                     Keywords = new KeywordsOptions()
                     {
-                        Limit = 7,
+                        Limit = 4,
                         Sentiment = true,
                         Emotion = true
                     }
