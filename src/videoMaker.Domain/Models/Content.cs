@@ -17,7 +17,7 @@ namespace videoMaker.Domain.Models
             public string Text { get; set; }
             public string[] Keywords { get; set; }
             public string[] Images { get; set; }
-            public string GoogleSearchQuery { get; internal set; }
+            public string GoogleSearchQuery { get;  set; }
         }
 
 
