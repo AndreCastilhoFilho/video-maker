@@ -1,13 +1,12 @@
 ﻿using Google.Apis.Customsearch.v1;
 using Google.Apis.Services;
-using Newtonsoft.Json;
+using ImageMagick;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using videoMaker.Domain.Models;
 using videoMaker.Domain.Robots.Services;
-using static Google.Apis.Customsearch.v1.CseResource.SiterestrictResource.ListRequest;
 
 namespace videoMaker.Domain.Robots
 {
@@ -28,8 +27,48 @@ namespace videoMaker.Domain.Robots
 
             FetchAllGoogleImages(content);
             DownloadAllImages(content);
+            ConvertAllImages(content);
 
             State.Save(content);
+        }
+
+        private void ConvertAllImages(Content content)
+        {
+            var index = 0;
+            foreach (var s in content?.Sentences.Where(s => s.Keywords.Any()))
+            {
+                index++;
+                ConvertImage(index);
+            }
+        }
+
+        private void ConvertImage(int index)
+        {
+            var inputFile = $"{AppDomain.CurrentDomain.BaseDirectory }\\Content\\{index}-original.jpg";
+            var outputFile = $"{AppDomain.CurrentDomain.BaseDirectory }\\Content\\{index}-converted.jpg";
+            var width = 1920;
+            var height = 1080;
+
+            using (MagickImage image = new MagickImage(inputFile))
+            {
+                using (IMagickImage backgroundImg = image.Clone())
+                {
+                    backgroundImg.Blur(0, 9);
+                    backgroundImg.Crop(width, height, Gravity.Center);
+                    backgroundImg.RePage();
+
+                    image.Resize(0, height);
+
+                    IMagickImage _shadow = new MagickImage(MagickColor.FromRgb(0, 0, 0), image.Width + 20, height);
+                    _shadow.Shadow(backgroundImg.Width, 400, 10, (Percentage)90);
+
+                    backgroundImg.Composite(_shadow, Gravity.Center, CompositeOperator.Atop);
+                    backgroundImg.Composite(image, Gravity.Center, CompositeOperator.SrcAtop);
+                    backgroundImg.Write(outputFile);
+                }
+            }
+
+
         }
 
         private void FetchAllGoogleImages(Content content)
@@ -44,30 +83,42 @@ namespace videoMaker.Domain.Robots
 
         public void DownloadAllImages(Content content)
         {
-            var downloadedImages = new List<string>();
+            var DownloadedImages = new List<string>();
 
+            var index = 0;
             foreach (var s in content?.Sentences.Where(s => s.Keywords.Any()))
             {
-                foreach (var url in s.Images)
+                index++;
+                var url = s.Images.FirstOrDefault();
+                try
                 {
-                    try
-                    {
-                        if (downloadedImages.Contains(url))
-                            throw new Exception("Imagem já foi baixada");
+                    TryDownloadImage(DownloadedImages, index, url);
 
-                        DownloadImage(url, Guid.NewGuid().ToString());
-                        downloadedImages.Add(url);
-
-                        Console.WriteLine($"Baixou imagem com sucesso {url}");
-                        break;
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Erro ao baixar Imagem {url}");
-                        //throw;
-                    }
                 }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Erro ao baixar Imagem {url}");
+
+                    if (s.Images.Length > 1 && url != s.Images[1])
+                    {
+                        Console.WriteLine($"Tentando baixar segunda opção de imagem");
+                        TryDownloadImage(DownloadedImages, index, s.Images[1]);
+                    }
+                    //throw;
+                }
+
             }
+        }
+
+        private void TryDownloadImage(List<string> DownloadedImages, int index, string url)
+        {
+            if (DownloadedImages.Contains(url))
+                throw new Exception("Imagem já foi baixada");
+
+            DownloadImage(url, index.ToString());
+            DownloadedImages.Add(url);
+
+            Console.WriteLine($"Baixou imagem com sucesso {url}");
         }
 
         private void DownloadImage(string url, string name)
@@ -78,7 +129,7 @@ namespace videoMaker.Domain.Robots
 
             using (WebClient client = new WebClient())
             {
-                client.DownloadFile(new Uri(url), $"{baseDirectory}{name}" + System.IO.Path.GetExtension(url));
+                client.DownloadFile(new Uri(url), $"{baseDirectory}{name}-original" + ".jpg");
             }
         }
 
@@ -118,5 +169,7 @@ namespace videoMaker.Domain.Robots
 
             return imagesUrl;
         }
+
+
     }
 }
