@@ -28,6 +28,7 @@ namespace videoMaker.Domain.Robots
             FetchAllGoogleImages(content);
             DownloadAllImages(content);
             ConvertAllImages(content);
+            CreateAllImagesSentences(content);
 
             State.Save(content);
         }
@@ -67,8 +68,45 @@ namespace videoMaker.Domain.Robots
                     backgroundImg.Write(outputFile);
                 }
             }
+        }
 
+        private void CreateAllImagesSentences(Content content)
+        {
+            var index = 0;
+            foreach (var s in content?.Sentences.Where(s => s.Keywords.Any()))
+            {
+                index++;
+                try
+                {
+                    CreateImageSentence(index, s.Text);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+            }
+        }
 
+        private void CreateImageSentence(int index, string sentence)
+        {
+            var outputFile = $"{AppDomain.CurrentDomain.BaseDirectory }\\Content\\{index}-sentence.png";
+
+            using (MagickImage image = new MagickImage())
+            {
+                MagickReadSettings settings = new MagickReadSettings()
+                {
+                    BackgroundColor = MagickColors.Transparent,
+                    FillColor = MagickColors.White,
+                    Font = "Arial",
+                    Width = 1920,
+                    Height = 1080,
+                    TextGravity = Gravity.Center
+
+                };
+
+                image.Read($"caption:{sentence}", settings);
+                image.Write(outputFile);
+            }
         }
 
         private void FetchAllGoogleImages(Content content)
@@ -104,7 +142,6 @@ namespace videoMaker.Domain.Robots
                         Console.WriteLine($"Tentando baixar segunda opção de imagem");
                         TryDownloadImage(DownloadedImages, index, s.Images[1]);
                     }
-                    //throw;
                 }
 
             }
@@ -169,6 +206,8 @@ namespace videoMaker.Domain.Robots
 
             return imagesUrl;
         }
+
+
 
 
     }

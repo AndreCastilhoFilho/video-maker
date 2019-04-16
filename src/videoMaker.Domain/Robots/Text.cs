@@ -1,4 +1,5 @@
 ﻿using Algorithmia;
+using Newtonsoft.Json;
 using System;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -28,7 +29,7 @@ namespace videoMaker.Domain.Robots
             BreakContentIntoSentences();
             FetchKeywordsOfAllSentences();
 
-            State.Save(_content);         
+            State.Save(_content);
         }
 
         private void FetchKeywordsOfAllSentences()
@@ -45,9 +46,7 @@ namespace videoMaker.Domain.Robots
             var algorithm = client.algo(_settings.WikipidiaAlgorithm);
 
             var wikipidiaResponse = algorithm.pipe<object>(_content.SearchTerm);
-            var wikipidiaContent = wikipidiaResponse.result.ToString();
-
-
+            var wikipidiaContent = JsonConvert.SerializeObject(wikipidiaResponse.result).ToString();
             _content.SourceContentOriginal = wikipidiaContent;
         }
 
@@ -73,7 +72,8 @@ namespace videoMaker.Domain.Robots
                 .Replace("==", "")
                 .Replace("{", "")
                 .Replace("}", "")
-                .Replace(@"\", "");
+                .Replace(@"\", "")
+                .Replace("\"content\":", "");
         }
 
         private string RemoveBlankLines(string text)
@@ -84,11 +84,11 @@ namespace videoMaker.Domain.Robots
 
         private void BreakContentIntoSentences()
         {
-            var sentences = PragmaticSegmenterNet.Segmenter.Segment(_content.SourceContentSanitized).ToList<string>()
-                .Select(x => new Sentence() { Text = x })
-                .ToList();
-
-            _content.Sentences = sentences.Take(_settings.MaximunSentences).ToList();
+            //var sentences = PragmaticSegmenterNet.Segmenter.Segment(_content.SourceContentSanitized,PragmaticSegmenterNet.Language.English,false).ToList<string>()
+            //    .Select(x => new Sentence() { Text = x })
+            //    .ToList();
+            var sentences = Regex.Split(_content.SourceContentSanitized, @"(?<=[\.!\?])\s+").Take(_settings.MaximunSentences);
+            _content.Sentences = sentences.Select(x => new Sentence() { Text = x }).ToList();//sentences.Take(_settings.MaximunSentences).ToList();
         }
     }
 }
